@@ -8,17 +8,27 @@ const initialData = [
   { id: 4, lastName: "Alcaide", firstName: "Hannah", course: "DS", birthdate: "2001/06/18" },
 ];
 
-const allowedCourses = ["IT", "IS", "CS", "DS"];
+const studCourses = ["IT", "IS", "CS", "DS"];
 
-const calculateAge = (birthdate) => {
-  const birthDateObj = new Date(birthdate);
+// Function to calculate age based on birthdate
+const ageCalculation = (birthdate) => {
+  const birthdayDate = new Date(birthdate);
   const today = new Date();
-  let age = today.getFullYear() - birthDateObj.getFullYear();
-  const monthDifference = today.getMonth() - birthDateObj.getMonth();
-  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDateObj.getDate())) {
+  let age = today.getFullYear() - birthdayDate.getFullYear();
+  const monthDifference = today.getMonth() - birthdayDate.getMonth();
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdayDate.getDate())) {
     age--;
   }
   return age;
+};
+
+// Function to format date to YYYY/MM/DD for display
+const formatDate = (dateString) => {
+  const dateObj = new Date(dateString);
+  const year = dateObj.getFullYear();
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  return `${year}/${month}/${day}`;
 };
 
 function App() {
@@ -27,27 +37,30 @@ function App() {
   const [maxDate, setMaxDate] = useState("");
 
   const filteredData = initialData.filter((person) => {
-    const personAge = calculateAge(person.birthdate);
+    const personAge = ageCalculation(person.birthdate);
 
+    // Match the search query
     const matchesQuery =
       person.lastName.toLowerCase().includes(query.toLowerCase()) ||
       person.firstName.toLowerCase().includes(query.toLowerCase()) ||
       person.course.toLowerCase().includes(query.toLowerCase()) ||
       personAge.toString().includes(query);
 
-    const birthDateObj = new Date(person.birthdate);
+    const birthdayDate = new Date(person.birthdate);
+    
+    // Apply date filtering if min and max dates are provided
     const matchesDateRange =
-      (!minDate || birthDateObj >= new Date(minDate)) &&
-      (!maxDate || birthDateObj <= new Date(maxDate));
+      (!minDate || birthdayDate >= new Date(minDate)) &&
+      (!maxDate || birthdayDate <= new Date(maxDate));
 
     return matchesQuery && matchesDateRange;
   });
 
   return (
-    <div>
+    <div className="app-container">
       <h2>Student Management Table</h2>
 
-      <div>
+      <div className="search-section">
         <label>Search: </label>
         <input
           type="text"
@@ -57,24 +70,22 @@ function App() {
         />
       </div>
 
-      <div>
-        <label>Min Birthdate (YYYY/MM/DD): </label>
+      <div className="date-filter-section">
+        <label>Min Birthdate: </label>
         <input
-          type="text"
+          type="date"
           value={minDate}
           onChange={(e) => setMinDate(e.target.value)}
-          placeholder="YYYY/MM/DD"
         />
-        <label>Max Birthdate (YYYY/MM/DD): </label>
+        <label>Max Birthdate: </label>
         <input
-          type="text"
+          type="date"
           value={maxDate}
           onChange={(e) => setMaxDate(e.target.value)}
-          placeholder="YYYY/MM/DD"
         />
       </div>
 
-      <table border="1">
+      <table className="student-table">
         <thead>
           <tr>
             <th>Last Name</th>
@@ -89,9 +100,9 @@ function App() {
             <tr key={person.id}>
               <td>{person.lastName}</td>
               <td>{person.firstName}</td>
-              <td>{allowedCourses.includes(person.course) ? person.course : "N/A"}</td>
-              <td>{person.birthdate}</td>
-              <td>{calculateAge(person.birthdate)}</td>
+              <td>{studCourses.includes(person.course) ? person.course : "N/A"}</td>
+              <td>{formatDate(person.birthdate)}</td>
+              <td>{ageCalculation(person.birthdate)}</td>
             </tr>
           ))}
         </tbody>
